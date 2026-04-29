@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Smiggles Demo</title>
+  <style>html,body,#screen{height:100%;margin:0;background:black}</style>
+</head>
+<body>
+  <div id="screen"></div>
+  <script src="https://copy.sh/v86/build/v86.js"></script>
+  <script>
+    var emu = new V86Starter({
+      wasm_path: "https://copy.sh/v86/build/v86.wasm",
+      memory_size: 32 * 1024 * 1024,
+      vga_memory_size: 2 * 1024 * 1024,
+      bios: { url: "https://copy.sh/v86/bios/seabios.bin" },
+      vga_bios: { url: "https://copy.sh/v86/bios/vgabios.bin" },
+      hda: { url: "hdd.img", async: true },
+      screen_container: document.getElementById("screen"),
+      autostart: true
+    });
+  </script>
+</body>
+</html>
