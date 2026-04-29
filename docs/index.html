@@ -21,13 +21,12 @@
     const emu = new V86({
       screen_container: document.getElementById("screen"),
       wasm_path: "build/v86.wasm",
-      memory_size: 32 * 1024 * 1024,
-      vga_memory_size: 2 * 1024 * 1024,
       bios: { url: "bios/seabios.bin" },
       vga_bios: { url: "bios/vgabios.bin" },
-      hda: { url: "smiggles.iso" },
+      cdrom: { url: "smiggles.iso" },
+      hda: { url: "hdd.img" },
       autostart: true
-    });
-  </script>
+    });  
+</script>
 </body>
 </html>
