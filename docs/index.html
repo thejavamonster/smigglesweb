@@ -1,32 +1,66 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>Smiggles Demo</title>
-  <style>
-    html, body, #screen {
-      width: 100%;
-      height: 100%;
-      margin: 0;
-      background: black;
-      overflow: hidden;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smiggles OS - x86 Emulator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background-color: #000;
+            font-family: 'Courier New', 'Monaco', 'Lucida Console', monospace;
+            overflow: hidden;
+        }
+        
+        #screen {
+            width: 100vw;
+            height: 100vh;
+            display: block;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+        
+        canvas {
+            display: block;
+            background-color: #000;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 0;
+            line-height: 1;
+        }
+    </style>
 </head>
 <body>
-  <div id="screen"></div>
+    <canvas id="screen"></canvas>
+    
+    <script src="https://cdn.jsdelivr.net/npm/v86@latest/build/v86.js"></script>
+    <script>
+        var emulator = new V86({
+            wasm_path: "https://cdn.jsdelivr.net/npm/v86@latest/build/v86.wasm",
+            bios: {
+                url: "https://cdn.jsdelivr.net/npm/v86@latest/build/seabios.bin",
+            },
+            vga_bios: {
+                url: "https://cdn.jsdelivr.net/npm/v86@latest/build/vgabios.bin",
+            },
+            cdrom: {
+                url: "smiggles.iso",
+            },
+            hda: {
+                url: "hdd.img",
+            },
+            autostart: true,
+            memory_size: 64 * 1024 * 1024,
+            display_scale: 1,
+        });
 
-  <script src="build/libv86.js"></script>
-  <script>
-    const emu = new V86({
-      screen_container: document.getElementById("screen"),
-      wasm_path: "build/v86.wasm",
-      bios: { url: "bios/seabios.bin" },
-      vga_bios: { url: "bios/vgabios.bin" },
-      cdrom: { url: "smiggles.iso" },
-      hda: { url: "hdd.img" },
-      autostart: true
-    });  
-</script>
+        emulator.add_listener("emulator-ready", function() {
+            console.log("Smiggles OS is ready!");
+        });
+    </script>
 </body>
 </html>
