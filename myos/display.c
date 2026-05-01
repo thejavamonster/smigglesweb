@@ -237,19 +237,26 @@ void scroll_screen(char* video) {
 }
 
 void print_smiggles_art(char* video, int* cursor) {
-    const char* smiggles_art[6] = {
-        "               _             _           ",
-        " ___ _ __ ___ (_) __ _  __ _| | ___  ___ ",
-        "/ __| '_ ` _ \\| |/ _` |/ _` | |/ _ \\/ __|",
-        "\\__ \\ | | | | | | (_| | (_| | |  __/\\__ \\",
-        "|___/_| |_| |_|_|\\__, |\\__, |_|\\___||___/",
-        "                 |___/ |___/             "
+    const char* smiggles_art[8] = {
+        "               _             _                                           ",
+        " ___ _ __ ___ (_) __ _  __ _| | ___  ___                                 ",
+        "/ __| '_ ` _ \\| |/ _` |/ _` | |/ _ \\/ __|                                ",
+        "\\__ \\ | | | | | | (_| | (_| | |  __/\\__ \\                                ",
+        "|___/_| |_| |_|_|\\__, |\\__, |_|\\___||___/                                 ",
+        "                 |___/ |___/                                              ",
+        "Note: This is a demo and does not include all features (no networking stack).",
+        "Try running help or neofetch to start exploring!"
     };
-    int art_lines = 6;
+    int art_lines = 8;
+
+    /* Ensure each art row writes all 80 columns (pad with spaces) */
     for (int l = 0; l < art_lines; l++) {
-        for (int j = 0; smiggles_art[l][j] && j < 80; j++) {
-            video[(l*80+j)*2] = smiggles_art[l][j];
-            video[(l*80+j)*2+1] = COLOR_GREEN;
+        int len = 0;
+        while (smiggles_art[l][len] && len < 80) len++;
+        for (int j = 0; j < 80; j++) {
+            char ch = (j < len) ? smiggles_art[l][j] : ' ';
+            video[(l*80 + j) * 2] = ch;
+            video[(l*80 + j) * 2 + 1] = COLOR_GREEN;
         }
     }
     *cursor = art_lines * 80;

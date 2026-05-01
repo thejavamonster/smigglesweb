@@ -1,68 +1,64 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smiggles OS - x86 Emulator</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            background-color: #000;
-            font-family: 'Courier New', 'Monaco', 'Lucida Console', monospace;
-            overflow: hidden;
-        }
-        
-        #screen {
-            width: 100vw;
-            height: 100vh;
-            display: block;
-            image-rendering: pixelated;
-            image-rendering: crisp-edges;
-        }
-        
-        canvas {
-            display: block;
-            background-color: #000;
-            font-family: 'Courier New', monospace;
-            letter-spacing: 0;
-            line-height: 1;
-        }
-    </style>
+  <meta charset="utf-8" />
+  <title>Smiggles Demo</title>
+  <style>
+  /* Apply to the container that holds v86 output (adjust #screen to your element) */
+  html,body { height:100%; margin:0; background:#000; }
+
+  #screen {
+    white-space: pre;                /* preserve consecutive spaces */
+    font-variant-ligatures: none;    /* disable ligatures */
+    line-height: 18px;               /* try slightly taller to avoid clipping */
+    letter-spacing: 0;               /* no extra kerning */
+    font-family: "Courier New", monospace;
+    font-size: 16px;                 /* tune to your v86 font_height */
+    display: inline-block;           /* keep canvas pixel-aligned */
+    padding: 0;
+    padding-bottom: 2px;             /* reveal bottom row if clipped */
+    margin: 0;
+    overflow: visible;
+    -webkit-font-smoothing: none;
+    -moz-font-smoothing: none;
+    background: #000;
+  }
+
+  /* Ensure the canvas renders crisply and sits at the top of the container */
+  #screen canvas {
+    display: block;
+    vertical-align: top;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    margin: 0;
+    padding: 0;
+    transform-origin: 0 0;
+  }
+  </style>
 </head>
 <body>
-    <canvas id="screen"></canvas>
-    
-    <script src="build/libv86.js"></script>
-    <script>
-        window.addEventListener('load', function() {
-            var emulator = new V86({
-                wasm_path: "build/v86.wasm",
-                bios: {
-                    url: "bios/seabios.bin",
-                },
-                vga_bios: {
-                    url: "bios/vgabios.bin",
-                },
-                cdrom: {
-                    url: "smiggles.iso",
-                },
-                hda: {
-                    url: "hdd.img",
-                },
-                autostart: true,
-                memory_size: 64 * 1024 * 1024,
-                display_scale: 1,
-            });
+  <div id="screen"></div>
 
-            emulator.add_listener("emulator-ready", function() {
-                console.log("Smiggles OS is ready!");
-            });
-        });
-    </script>
+  <script src="build/libv86.js"></script>
+  <script>
+    const cdromUrl = "smiggles.iso?v=" + Date.now();
+
+    const emu = new V86({
+      screen_container: document.getElementById("screen"),
+      wasm_path: "build/v86.wasm",
+      bios: { url: "bios/seabios.bin" },
+      vga_bios: { url: "bios/vgabios.bin" },
+      cdrom: { url: cdromUrl },
+      hda: { url: "hdd.img" },
+      autostart: true,
+      screen_options: {
+        use_graphical_text: true,
+        font_width: 9,         /* try wider glyphs to avoid cut-off */
+        font_height: 18,
+        disable_autoscale: true,
+        display_scale: 1
+      }
+    });
+  </script>
 </body>
 </html>

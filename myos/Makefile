@@ -90,6 +90,12 @@ smiggles.iso: kernel.elf iso/boot/grub/grub.cfg
 	$(call check_tool,$(GRUB_MKRESCUE),grub-mkrescue / i686-elf-grub-mkrescue,GRUB_MKRESCUE)
 	mkdir -p iso/boot
 	cp kernel.elf iso/boot/kernel.elf
+
+	# Include repository packages in the ISO so web-demo can access /packages/
+	if [ -d ../packages ]; then \
+		mkdir -p iso/packages; \
+		cp -r ../packages/* iso/packages/ 2>/dev/null || true; \
+	fi
 	$(GRUB_MKRESCUE) -o $@ iso >/dev/null
 
 # HDD image--explicit device/bus options kept for workflows that need them.

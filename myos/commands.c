@@ -1571,6 +1571,29 @@ static int parse_ipv4_text(const char* s, uint8_t out_ip[4]) {
 #define PKG_MAX_RECV 512
 #define PKG_CHUNK_SIZE 384
 
+static int pkg_get_builtin_payload(const char* name, char* out, int out_max) {
+    const char* payload = 0;
+    int n;
+
+    if (!name || !out || out_max <= 1) return 0;
+
+    if (mini_strcmp(name, "hello") == 0 || mini_strcmp(name, "hello.bas") == 0) {
+        payload = "10 PRINT \"HELLO FROM PKG\"\n"
+                  "20 PRINT \"SMIGGLES PACKAGE INSTALL WORKS\"\n";
+    } else if (mini_strcmp(name, "clock") == 0 || mini_strcmp(name, "clock.bas") == 0) {
+        payload = "10 PRINT \"CLOCK PACKAGE\"\n"
+                  "20 PRINT \"RUN TIME IN SMIGGLES\"\n";
+    }
+
+    if (!payload) return 0;
+
+    n = str_len(payload);
+    if (n >= out_max) n = out_max - 1;
+    for (int i = 0; i < n; i++) out[i] = payload[i];
+    out[n] = 0;
+    return n;
+}
+
 static const char* skip_spaces(const char* s) {
     while (s && *s == ' ') s++;
     return s;
@@ -2103,6 +2126,54 @@ pkg_install_normalize_path:
         str_copy(install_path, resolved_install_path, sizeof(install_path));
     }
 
+    /* Attempt local-packages fallback: if the ISO/web-demo includes a /packages/ dir,
+       read the package directly from the filesystem instead of using the network. */
+    {
+        char candidate[MAX_PATH_LENGTH];
+        int local_len = 0;
+
+        candidate[0] = 0;
+        /* Try exact name first */
+        str_copy(candidate, "/packages/", sizeof(candidate));
+        append_bounded(candidate, sizeof(candidate), request_package_name);
+        local_len = shell_read_file_content(candidate, file_content, (int)sizeof(file_content));
+
+        /* Try common extensions if not found */
+        if (local_len < 0) {
+            candidate[0] = 0;
+            str_copy(candidate, "/packages/", sizeof(candidate));
+            append_bounded(candidate, sizeof(candidate), request_package_name);
+            append_bounded(candidate, sizeof(candidate), ".pkg");
+            local_len = shell_read_file_content(candidate, file_content, (int)sizeof(file_content));
+        }
+        if (local_len < 0) {
+            candidate[0] = 0;
+            str_copy(candidate, "/packages/", sizeof(candidate));
+            append_bounded(candidate, sizeof(candidate), request_package_name);
+            append_bounded(candidate, sizeof(candidate), ".bas");
+            local_len = shell_read_file_content(candidate, file_content, (int)sizeof(file_content));
+        }
+        if (local_len < 0) {
+            candidate[0] = 0;
+            str_copy(candidate, "/packages/", sizeof(candidate));
+            append_bounded(candidate, sizeof(candidate), request_package_name);
+            append_bounded(candidate, sizeof(candidate), ".txt");
+            local_len = shell_read_file_content(candidate, file_content, (int)sizeof(file_content));
+        }
+
+        if (local_len > 0) {
+            installed_len = local_len;
+            /* jump to post-fetch handling */
+            goto pkg_install_after_fetch;
+        }
+
+        local_len = pkg_get_builtin_payload(request_package_name, file_content, (int)sizeof(file_content));
+        if (local_len > 0) {
+            installed_len = local_len;
+            goto pkg_install_after_fetch;
+        }
+    }
+
     for (int offset = 0; offset < MAX_FILE_CONTENT - 1;) {
         char request[128];
         char num[16];
@@ -2184,6 +2255,7 @@ pkg_install_normalize_path:
         if (chunk_len < PKG_CHUNK_SIZE) break;
     }
 
+pkg_install_after_fetch:
     if (installed_len <= 0) {
         print_string("PKG: empty package payload", -1, video, cursor, COLOR_LIGHT_RED);
         return;

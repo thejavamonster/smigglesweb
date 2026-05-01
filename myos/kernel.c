@@ -270,8 +270,16 @@ User user_table[MAX_USERS] = {
     }
 };
 int user_count = 2;
+static void initialize_default_passwords(void) {
+    hash_password("admin", user_table[0].password_hash);
+    hash_password("user", user_table[1].password_hash);
+}
+__attribute__((constructor))
+static void kernel_early_init(void) {
+    initialize_default_passwords();
+}
 
-int current_user_idx = -1; // -1 means no user logged in
+int current_user_idx = -1;
 
 
 
@@ -517,6 +525,7 @@ void kernel_main(unsigned int mb_magic, unsigned int mb_info_addr) {
     for (int i = 0; i < 80*25*2; i += 2) {
         video[i] = ' ';
         video[i + 1] = 0x07;
+        initialize_default_passwords();
     }
     // Hide hardware text cursor while boot status is shown.
     asm volatile ("outb %0, %1" : : "a"((unsigned char)0x0A), "Nd"((unsigned short)0x3D4));
