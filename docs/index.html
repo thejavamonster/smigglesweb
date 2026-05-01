@@ -4,19 +4,17 @@
   <meta charset="utf-8" />
   <title>Smiggles Demo</title>
   <style>
-  /* Apply to the container that holds v86 output (adjust #screen to your element) */
   html,body { height:100%; margin:0; background:#000; }
 
   #screen {
-    white-space: pre;                /* preserve consecutive spaces */
+    white-space: pre;                /* kep consecutive spaces */
     font-variant-ligatures: none;    /* disable ligatures */
-    line-height: 18px;               /* try slightly taller to avoid clipping */
+    line-height: 18px;               /* try a bit taller to avoid clipping */
     letter-spacing: 0;               /* no extra kerning */
     font-family: "Courier New", monospace;
-    font-size: 16px;                 /* tune to your v86 font_height */
-    display: inline-block;           /* keep canvas pixel-aligned */
-    padding: 0;
-    padding-bottom: 2px;             /* reveal bottom row if clipped */
+    font-size: 16px;                 
+    display: inline-block;           
+    padding-bottom: 2px;             
     margin: 0;
     overflow: visible;
     -webkit-font-smoothing: none;
@@ -24,7 +22,6 @@
     background: #000;
   }
 
-  /* Ensure the canvas renders crisply and sits at the top of the container */
   #screen canvas {
     display: block;
     vertical-align: top;
@@ -53,7 +50,7 @@
       autostart: true,
       screen_options: {
         use_graphical_text: true,
-        font_width: 9,         /* try wider glyphs to avoid cut-off */
+        font_width: 9,         /* try wider fonts to avoid cutoff */
         font_height: 18,
         disable_autoscale: true,
         display_scale: 1
