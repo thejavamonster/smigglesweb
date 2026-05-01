@@ -1594,6 +1594,15 @@ static int pkg_get_builtin_payload(const char* name, char* out, int out_max) {
     return n;
 }
 
+static int pkg_print_builtin_catalog(char* video, int* cursor) {
+    int printed = 0;
+    print_string("PKG: offline packages:", -1, video, cursor, COLOR_YELLOW);
+    print_string("hello", -1, video, cursor, COLOR_LIGHT_GRAY);
+    print_string("clock", -1, video, cursor, COLOR_LIGHT_GRAY);
+    printed += 2;
+    return printed;
+}
+
 static const char* skip_spaces(const char* s) {
     while (s && *s == ' ') s++;
     return s;
@@ -2330,14 +2339,15 @@ static void handle_pkg_search_command(char* video, int* cursor) {
     int printed = 0;
 
     if (!pkg_repo_get(ip_text, sizeof(ip_text), &port) || !parse_ipv4_text(ip_text, server_ip) || port < 1 || port > 65535) {
-        print_string("PKG: no valid repo configured", -1, video, cursor, COLOR_LIGHT_RED);
+        print_string("PKG: no valid repo configured", -1, video, cursor, COLOR_YELLOW);
+        (void)pkg_print_builtin_catalog(video, cursor);
         return;
     }
 
     xchg = pkg_exchange(server_ip, port, "LIST", payload, PKG_MAX_RECV, &payload_len);
     if (xchg <= 0) {
         if (xchg == -6) {
-            print_string("PKG: network adapter init failed", -1, video, cursor, COLOR_LIGHT_RED);
+            print_string("PKG: network adapter init failed", -1, video, cursor, COLOR_YELLOW);
         } else {
             char line[64];
             char code[16];
@@ -2345,14 +2355,16 @@ static void handle_pkg_search_command(char* video, int* cursor) {
             line[0] = 0;
             str_concat(line, "PKG: repository query failed code=");
             str_concat(line, code);
-            print_string(line, -1, video, cursor, COLOR_LIGHT_RED);
+            print_string(line, -1, video, cursor, COLOR_YELLOW);
         }
+        (void)pkg_print_builtin_catalog(video, cursor);
         return;
     }
 
     payload[payload_len] = 0;
     if (payload_len >= 4 && payload[0] == 'E' && payload[1] == 'R' && payload[2] == 'R' && payload[3] == ' ') {
-        print_string((const char*)payload, payload_len, video, cursor, COLOR_LIGHT_RED);
+        print_string((const char*)payload, payload_len, video, cursor, COLOR_YELLOW);
+        (void)pkg_print_builtin_catalog(video, cursor);
         return;
     }
 
@@ -2377,6 +2389,7 @@ static void handle_pkg_search_command(char* video, int* cursor) {
 
     if (!printed) {
         print_string("PKG: no packages listed", -1, video, cursor, COLOR_YELLOW);
+        (void)pkg_print_builtin_catalog(video, cursor);
     }
 }
 
